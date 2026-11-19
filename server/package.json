@@ -1,0 +1,26 @@
+{
+  "name": "portfolio-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=.env src/index.js",
+    "start": "node --env-file=.env src/index.js",
+    "seed": "node --env-file=.env scripts/seed.js",
+    "test": "node --test",
+    "cf:dev": "wrangler dev",
+    "cf:deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.9.0",
+    "zod": "^4.0.0",
+    "sanitize-html": "^2.14.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}
