@@ -1,6 +1,7 @@
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
-
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || ""
+).replace(/\/+$/, "");
 // Centralized API configuration.
 // Empty API_BASE_URL preserves Vite proxy behavior during local development.
 
@@ -41,8 +42,7 @@ export async function api<T = any>(
     headers["x-csrf-token"] = csrf;
   }
 
-  const url = `${API_BASE_URL}${path}`;
-
+const url = `${API_BASE_URL}${path}`;
   const res = await fetch(url, {
     method,
     headers,
