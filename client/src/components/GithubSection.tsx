@@ -2,13 +2,23 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import { useSite } from "../lib/site";
+import { api } from "../lib/api";
 import RevealOnScroll from "./RevealOnScroll";
 import SectionHeading from "./SectionHeading";
 
 type GithubData = {
   ok: boolean;
-  user?: { public_repos: number; followers: number; public_gists: number };
-  repos?: { name: string; html_url: string; language: string | null; stargazers_count: number }[];
+  user?: {
+    public_repos: number;
+    followers: number;
+    public_gists: number;
+  };
+  repos?: {
+    name: string;
+    html_url: string;
+    language: string | null;
+    stargazers_count: number;
+  }[];
 };
 
 export default function GithubSection() {
@@ -17,18 +27,21 @@ export default function GithubSection() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/public/github?user=${SITE.githubUsername}`)
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) setData(d);
+
+    api<GithubData>(
+      `/api/public/github?user=${encodeURIComponent(SITE.githubUsername)}`
+    )
+      .then((result) => {
+        if (!cancelled) setData(result);
       })
       .catch(() => {
         if (!cancelled) setData({ ok: false });
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [SITE.githubUsername]);
 
   return (
     <section id="github" className="py-28 md:py-36">
@@ -39,8 +52,8 @@ export default function GithubSection() {
               <SectionHeading compact label="On GitHub" title="Mostly green squares." />
               <p className="mb-6" style={{ color: "var(--text-muted)" }}>
                 Live stats fetched server-side from the GitHub API for{" "}
-                <span className="font-mono text-sm">@{SITE.githubUsername}</span>. If the request fails,
-                placeholder dashes are shown instead — this section never fabricates numbers.
+                <span className="font-mono text-sm">@{SITE.githubUsername}</span>.
+                If the request fails, placeholder dashes are shown instead.
               </p>
               <a
                 href={`https://github.com/${SITE.githubUsername}`}
@@ -63,11 +76,16 @@ export default function GithubSection() {
                     repositories
                   </p>
                 </div>
+
                 <div className="card p-5 text-center">
                   <p className="font-display text-2xl font-semibold">
                     {data?.ok ? data.user?.followers : "—"}
                   </p>
+                  <p className="font-mono text-[11px] mt-1" style={{ color: "var(--text-muted)" }}>
+                    followers
+                  </p>
                 </div>
+
                 <div className="card p-5 text-center">
                   <p className="font-display text-2xl font-semibold">
                     {data?.ok ? data.user?.public_gists : "—"}
@@ -80,26 +98,27 @@ export default function GithubSection() {
 
               <div className="space-y-3">
                 {data?.ok && data.repos && data.repos.length > 0 ? (
-                  data.repos.map((r) => (
+                  data.repos.map((repo) => (
                     <a
-                      key={r.name}
-                      href={r.html_url}
+                      key={repo.name}
+                      href={repo.html_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="card p-4 flex items-center justify-between"
                       data-cursor
                     >
                       <div>
-                        <p className="text-sm font-medium">{r.name}</p>
+                        <p className="text-sm font-medium">{repo.name}</p>
                         <p className="text-xs" style={{ color: "var(--text-faint)" }}>
-                          {r.language || "multiple languages"}
+                          {repo.language || "multiple languages"}
                         </p>
                       </div>
+
                       <span
                         className="font-mono text-xs flex items-center gap-1"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        <Star size={12} /> {r.stargazers_count}
+                        <Star size={12} /> {repo.stargazers_count}
                       </span>
                     </a>
                   ))
@@ -108,7 +127,7 @@ export default function GithubSection() {
                     <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                       {data === null
                         ? "Loading live GitHub activity…"
-                        : "Live GitHub data couldn't be loaded right now (rate limit or network issue). Set a real username in SITE.githubUsername to show live activity here."}
+                        : "Live GitHub data couldn't be loaded right now. Check the GitHub username or API availability."}
                     </p>
                   </div>
                 )}
